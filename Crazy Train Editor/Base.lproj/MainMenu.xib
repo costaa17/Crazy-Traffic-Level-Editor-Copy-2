@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="9531" systemVersion="15A284" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="10116" systemVersion="15E65" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9531"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="10116"/>
+        <capability name="stacking Non-gravity area distributions on NSStackView" minToolsVersion="7.0" minSystemVersion="10.11"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="NSApplication">
@@ -671,26 +672,27 @@
             </items>
         </menu>
         <window title="Crazy Train Editor" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" animationBehavior="default" id="QvC-M9-y7g">
-            <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
+            <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="335" y="390" width="480" height="360"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1440" height="900"/>
+            <rect key="contentRect" x="335" y="390" width="650" height="360"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1440" height="877"/>
             <view key="contentView" id="EiT-Mj-1SZ">
-                <rect key="frame" x="0.0" y="0.0" width="480" height="360"/>
+                <rect key="frame" x="0.0" y="0.0" width="650" height="360"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="RFw-ko-0Hh" customClass="EditorView" customModule="Crazy_Train_Editor" customModuleProvider="target">
-                        <rect key="frame" x="0.0" y="0.0" width="480" height="360"/>
+                        <rect key="frame" x="0.0" y="0.0" width="650" height="360"/>
                         <connections>
-                            <outlet property="typeButton" destination="LOe-oF-eG5" id="l3k-QM-VH0"/>
+                            <outlet property="backgroundTypePopUp" destination="IOb-bq-0tn" id="cxV-G4-4So"/>
+                            <outlet property="pathTypePopUp" destination="LOe-oF-eG5" id="9IH-4x-i83"/>
                         </connections>
                     </customView>
                 </subviews>
                 <constraints>
-                    <constraint firstAttribute="bottom" secondItem="RFw-ko-0Hh" secondAttribute="bottom" id="46u-jK-n1D"/>
-                    <constraint firstItem="RFw-ko-0Hh" firstAttribute="leading" secondItem="EiT-Mj-1SZ" secondAttribute="leading" id="bJP-VJ-8xx"/>
-                    <constraint firstItem="RFw-ko-0Hh" firstAttribute="top" secondItem="EiT-Mj-1SZ" secondAttribute="top" id="bO3-4s-hBa"/>
-                    <constraint firstAttribute="trailing" secondItem="RFw-ko-0Hh" secondAttribute="trailing" id="oyf-wV-wlV"/>
+                    <constraint firstItem="RFw-ko-0Hh" firstAttribute="leading" secondItem="EiT-Mj-1SZ" secondAttribute="leading" id="E1B-LW-pHk"/>
+                    <constraint firstAttribute="trailing" secondItem="RFw-ko-0Hh" secondAttribute="trailing" id="PyY-5x-VHp"/>
+                    <constraint firstAttribute="bottom" secondItem="RFw-ko-0Hh" secondAttribute="bottom" id="UCC-U4-cJw"/>
+                    <constraint firstItem="RFw-ko-0Hh" firstAttribute="top" secondItem="EiT-Mj-1SZ" secondAttribute="top" id="wHw-nC-I0X"/>
                 </constraints>
             </view>
             <toolbar key="toolbar" implicitIdentifier="03E717C8-C036-4A67-B04F-85675A8A7AB9" autosavesConfiguration="NO" displayMode="iconAndLabel" sizeMode="regular" id="eny-ld-Oz3">
@@ -704,7 +706,7 @@
                         <popUpButton key="view" verticalHuggingPriority="750" id="zuQ-zf-F4P">
                             <rect key="frame" x="0.0" y="14" width="100" height="26"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                            <popUpButtonCell key="cell" type="roundTextured" bezelStyle="texturedRounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="mYB-JN-UIO">
+                            <popUpButtonCell key="cell" type="roundTextured" title="iPhone 6/6S" bezelStyle="texturedRounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" selectedItem="WdD-DF-0eI" id="mYB-JN-UIO">
                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                 <font key="font" metaFont="menu"/>
                                 <menu key="menu" id="fzZ-96-owd">
@@ -713,7 +715,7 @@
                                             <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                         </menuItem>
                                         <menuItem title="iPhone 5/5S" id="gqQ-sn-l64"/>
-                                        <menuItem title="iPhone 6/6S" id="WdD-DF-0eI">
+                                        <menuItem title="iPhone 6/6S" state="on" id="WdD-DF-0eI">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                         </menuItem>
                                         <menuItem title="iPhone 6+/6S+" id="0Nx-Mq-aIl"/>
@@ -725,14 +727,14 @@
                             </connections>
                         </popUpButton>
                     </toolbarItem>
-                    <toolbarItem implicitItemIdentifier="4FC1F343-FC10-48B1-B827-9B724782B894" label="Show Data" paletteLabel="Show Data" image="NSListViewTemplate" id="Cjs-xo-kib">
+                    <toolbarItem implicitItemIdentifier="4FC1F343-FC10-48B1-B827-9B724782B894" label="Show Data" paletteLabel="Show Data" image="ShowData" id="Cjs-xo-kib">
                         <nil key="toolTip"/>
-                        <size key="minSize" width="40" height="25"/>
-                        <size key="maxSize" width="40" height="25"/>
+                        <size key="minSize" width="34" height="32"/>
+                        <size key="maxSize" width="40" height="34"/>
                         <button key="view" verticalHuggingPriority="750" id="vOG-zx-PVM">
-                            <rect key="frame" x="12" y="14" width="40" height="25"/>
+                            <rect key="frame" x="12" y="14" width="40" height="34"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                            <buttonCell key="cell" type="roundTextured" bezelStyle="texturedRounded" image="NSListViewTemplate" imagePosition="only" alignment="center" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="6B0-aa-Ehb">
+                            <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="ShowData" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" inset="2" id="6B0-aa-Ehb">
                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                 <font key="font" metaFont="system"/>
                             </buttonCell>
@@ -741,130 +743,209 @@
                             </connections>
                         </button>
                     </toolbarItem>
-                    <toolbarItem implicitItemIdentifier="3229FAAC-E93B-48C0-98C0-F273DF524B0A" label="type" paletteLabel="type" id="oyN-X0-fUj">
+                    <toolbarItem implicitItemIdentifier="3229FAAC-E93B-48C0-98C0-F273DF524B0A" label="Path Type" paletteLabel="Path Type" id="oyN-X0-fUj">
                         <nil key="toolTip"/>
                         <size key="minSize" width="100" height="28"/>
                         <size key="maxSize" width="100" height="28"/>
                         <popUpButton key="view" verticalHuggingPriority="750" id="LOe-oF-eG5">
                             <rect key="frame" x="0.0" y="14" width="100" height="28"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                            <popUpButtonCell key="cell" type="roundTextured" title="garbage" bezelStyle="texturedRounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" selectedItem="TxW-et-ggx" id="EyC-eh-wdu">
+                            <popUpButtonCell key="cell" type="roundTextured" title="Road" bezelStyle="texturedRounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" selectedItem="4Al-Vz-h0A" id="EyC-eh-wdu">
                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                 <font key="font" metaFont="menu"/>
                                 <menu key="menu" id="sLt-Ld-uMs">
                                     <items>
-                                        <menuItem title="road" id="4Al-Vz-h0A">
+                                        <menuItem title="Road" state="on" id="4Al-Vz-h0A">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                         </menuItem>
-                                        <menuItem title="rail" id="RVc-2X-Xlf"/>
-                                        <menuItem title="walk" id="lVJ-5X-2fS">
+                                        <menuItem title="Rail" id="RVc-2X-Xlf"/>
+                                        <menuItem title="Walk" id="lVJ-5X-2fS">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                         </menuItem>
-                                        <menuItem title="cross" id="SaK-ol-sGk">
+                                        <menuItem title="Cross" id="SaK-ol-sGk">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                         </menuItem>
-                                        <menuItem title="crazy ped" id="KhU-RS-gys">
+                                        <menuItem title="Crazy Ped" id="KhU-RS-gys">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                         </menuItem>
-                                        <menuItem title="garbage" state="on" id="TxW-et-ggx">
+                                        <menuItem title="Garbage" id="TxW-et-ggx">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                         </menuItem>
                                     </items>
                                 </menu>
                             </popUpButtonCell>
                             <connections>
-                                <action selector="typeDidChange:" target="RFw-ko-0Hh" id="45J-jI-3wI"/>
+                                <action selector="pathTypeDidChange:" target="RFw-ko-0Hh" id="RzV-TK-mtY"/>
                             </connections>
                         </popUpButton>
                     </toolbarItem>
-                    <toolbarItem implicitItemIdentifier="C70BF94B-D6AF-4A98-A145-BD7811D67106" label="" paletteLabel="" id="fhf-J8-Xgc">
+                    <toolbarItem implicitItemIdentifier="5C846F26-7AAF-4C63-A7AC-91D8DAADC58E" label="Background" paletteLabel="Background" id="Cuu-2M-nQi">
                         <nil key="toolTip"/>
-                        <size key="minSize" width="82" height="32"/>
-                        <size key="maxSize" width="82" height="32"/>
-                        <button key="view" verticalHuggingPriority="750" id="Dpj-OP-Ea6">
-                            <rect key="frame" x="0.0" y="14" width="82" height="32"/>
+                        <size key="minSize" width="100" height="28"/>
+                        <size key="maxSize" width="100" height="28"/>
+                        <popUpButton key="view" verticalHuggingPriority="750" id="IOb-bq-0tn">
+                            <rect key="frame" x="0.0" y="14" width="100" height="28"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                            <buttonCell key="cell" type="push" title="stop editing" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="yX9-bl-Y4C">
+                            <popUpButtonCell key="cell" type="roundTextured" title="Grass" bezelStyle="texturedRounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" selectedItem="vxk-8Z-jIq" id="Ukg-tK-ZYC">
+                                <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                <font key="font" metaFont="menu"/>
+                                <menu key="menu" id="Ak4-fy-vF1">
+                                    <items>
+                                        <menuItem title="Grass" state="on" id="vxk-8Z-jIq">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                        </menuItem>
+                                        <menuItem title="Seafoam" id="y54-cf-arn">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                        </menuItem>
+                                        <menuItem title="Snow" id="wHi-vj-2u0">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                        </menuItem>
+                                        <menuItem title="Turquoise" id="taL-fX-Vsv">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                        </menuItem>
+                                        <menuItem title="Indigo" id="2am-Yu-Lkn">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                        </menuItem>
+                                        <menuItem title="Charcoal" id="agA-dk-d20">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                        </menuItem>
+                                        <menuItem title="Sand" id="0Aa-DM-vNZ">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                        </menuItem>
+                                        <menuItem title="Almond" id="Iur-VZ-N3k">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                        </menuItem>
+                                        <menuItem title="Coral" id="sIx-qv-JsC">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                        </menuItem>
+                                        <menuItem title="Mud" id="5Ef-CY-KEy">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                        </menuItem>
+                                    </items>
+                                </menu>
+                            </popUpButtonCell>
+                            <connections>
+                                <action selector="backgroundTypeDidChange:" target="RFw-ko-0Hh" id="Enc-IF-xIB"/>
+                            </connections>
+                        </popUpButton>
+                    </toolbarItem>
+                    <toolbarItem implicitItemIdentifier="1FFCB7A9-659C-4999-81A4-2405D3B70565" label="Remove" paletteLabel="Remove" image="RemovePath" id="TlZ-Cp-rKh">
+                        <nil key="toolTip"/>
+                        <size key="minSize" width="40" height="34"/>
+                        <size key="maxSize" width="40" height="34"/>
+                        <button key="view" verticalHuggingPriority="750" id="lE7-Du-NCC">
+                            <rect key="frame" x="5" y="14" width="40" height="34"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                            <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="RemovePath" imagePosition="overlaps" alignment="center" inset="2" id="Wpp-6o-tOE">
                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                 <font key="font" metaFont="system"/>
                             </buttonCell>
                             <connections>
-                                <action selector="stopEditing:" target="RFw-ko-0Hh" id="hpm-Z3-MnH"/>
+                                <action selector="removePath:" target="RFw-ko-0Hh" id="hqw-Jc-Ysw"/>
                             </connections>
                         </button>
                     </toolbarItem>
-                    <toolbarItem implicitItemIdentifier="09EB3DC8-DA16-4C13-84A9-B01BCA7D8B59" label="" paletteLabel="" id="NTt-xF-emF">
+                    <toolbarItem implicitItemIdentifier="C70BF94B-D6AF-4A98-A145-BD7811D67106" label="Stop Editing" paletteLabel="Stop Editing" image="StopEditing" id="fhf-J8-Xgc">
                         <nil key="toolTip"/>
-                        <size key="minSize" width="82" height="32"/>
-                        <size key="maxSize" width="82" height="32"/>
-                        <button key="view" verticalHuggingPriority="750" id="xZV-Ur-XZi">
-                            <rect key="frame" x="0.0" y="14" width="82" height="32"/>
+                        <size key="minSize" width="40" height="34"/>
+                        <size key="maxSize" width="40" height="34"/>
+                        <button key="view" verticalHuggingPriority="750" id="Dpj-OP-Ea6">
+                            <rect key="frame" x="16" y="14" width="40" height="34"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                            <buttonCell key="cell" type="push" title="new curve" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Rmy-um-X6k">
+                            <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="StopEditing" imagePosition="only" alignment="center" inset="2" id="yX9-bl-Y4C">
                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                 <font key="font" metaFont="system"/>
                             </buttonCell>
                             <connections>
-                                <action selector="newCurve:" target="RFw-ko-0Hh" id="SpZ-q3-ccE"/>
+                                <action selector="stopEditing:" target="RFw-ko-0Hh" id="Hq5-kd-mfD"/>
+                            </connections>
+                        </button>
+                    </toolbarItem>
+                    <toolbarItem implicitItemIdentifier="1A6217AA-C87C-4D52-B70C-129225DA5A7A" label="Add To Path" paletteLabel="Add To Path" image="AddSegment" id="p1p-E8-fBK">
+                        <nil key="toolTip"/>
+                        <size key="minSize" width="40" height="34"/>
+                        <size key="maxSize" width="40" height="34"/>
+                        <button key="view" verticalHuggingPriority="750" id="PTO-CI-TjG">
+                            <rect key="frame" x="16" y="14" width="40" height="34"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                            <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="AddSegment" imagePosition="only" alignment="center" inset="2" id="F18-sd-bwc">
+                                <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                <font key="font" metaFont="system"/>
+                            </buttonCell>
+                            <connections>
+                                <action selector="addSegment:" target="RFw-ko-0Hh" id="ZXx-sV-Z86"/>
                             </connections>
                         </button>
                     </toolbarItem>
                 </allowedToolbarItems>
                 <defaultToolbarItems>
-                    <toolbarItem reference="Cjs-xo-kib"/>
-                    <toolbarItem reference="007-DS-icH"/>
                     <toolbarItem reference="oyN-X0-fUj"/>
+                    <toolbarItem reference="Cuu-2M-nQi"/>
+                    <toolbarItem reference="TlZ-Cp-rKh"/>
                     <toolbarItem reference="fhf-J8-Xgc"/>
-                    <toolbarItem reference="NTt-xF-emF"/>
+                    <toolbarItem reference="p1p-E8-fBK"/>
+                    <toolbarItem reference="jWq-mg-Axa"/>
+                    <toolbarItem reference="007-DS-icH"/>
+                    <toolbarItem reference="Cjs-xo-kib"/>
                 </defaultToolbarItems>
             </toolbar>
-            <point key="canvasLocation" x="-149" y="-152"/>
+            <point key="canvasLocation" x="-146" y="-77"/>
         </window>
         <window title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="rjo-4s-bAd">
-            <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
+            <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="131" y="158" width="390" height="299"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1440" height="900"/>
+            <rect key="contentRect" x="131" y="158" width="548" height="301"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1440" height="877"/>
             <view key="contentView" id="uD9-Ck-40Q">
-                <rect key="frame" x="0.0" y="0.0" width="390" height="299"/>
+                <rect key="frame" x="0.0" y="0.0" width="548" height="301"/>
                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                 <subviews>
-                    <scrollView fixedFrame="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KWQ-fF-iPP">
-                        <rect key="frame" x="20" y="38" width="350" height="241"/>
-                        <clipView key="contentView" ambiguous="YES" id="ON4-M9-gJp">
-                            <rect key="frame" x="1" y="1" width="348" height="239"/>
-                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                            <subviews>
-                                <textView ambiguous="YES" editable="NO" importsGraphics="NO" findStyle="panel" continuousSpellChecking="YES" allowsUndo="YES" usesRuler="YES" usesFontPanel="YES" verticallyResizable="YES" allowsNonContiguousLayout="YES" quoteSubstitution="YES" dashSubstitution="YES" spellingCorrection="YES" smartInsertDelete="YES" id="r6h-Ai-XIe">
-                                    <rect key="frame" x="0.0" y="0.0" width="348" height="239"/>
+                    <stackView distribution="fill" orientation="vertical" alignment="leading" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" fixedFrame="YES" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="DvN-L3-Nb8">
+                        <rect key="frame" x="20" y="44" width="508" height="237"/>
+                        <subviews>
+                            <scrollView ambiguous="YES" misplaced="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KWQ-fF-iPP">
+                                <rect key="frame" x="0.0" y="0.0" width="508" height="237"/>
+                                <clipView key="contentView" ambiguous="YES" id="ON4-M9-gJp">
+                                    <rect key="frame" x="1" y="1" width="506" height="235"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <subviews>
+                                        <textView ambiguous="YES" editable="NO" importsGraphics="NO" findStyle="panel" continuousSpellChecking="YES" allowsUndo="YES" usesRuler="YES" usesFontPanel="YES" verticallyResizable="YES" allowsNonContiguousLayout="YES" quoteSubstitution="YES" dashSubstitution="YES" spellingCorrection="YES" smartInsertDelete="YES" id="r6h-Ai-XIe">
+                                            <rect key="frame" x="0.0" y="0.0" width="506" height="235"/>
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                            <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                            <size key="minSize" width="506" height="235"/>
+                                            <size key="maxSize" width="519" height="10000000"/>
+                                            <color key="insertionPointColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                            <size key="minSize" width="506" height="235"/>
+                                            <size key="maxSize" width="519" height="10000000"/>
+                                        </textView>
+                                    </subviews>
                                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                    <size key="minSize" width="348" height="239"/>
-                                    <size key="maxSize" width="463" height="10000000"/>
-                                    <color key="insertionPointColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                    <size key="minSize" width="348" height="239"/>
-                                    <size key="maxSize" width="463" height="10000000"/>
-                                </textView>
-                            </subviews>
-                            <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                        </clipView>
-                        <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="YES" id="f7A-wW-L30">
-                            <rect key="frame" x="-100" y="-100" width="87" height="18"/>
-                            <autoresizingMask key="autoresizingMask"/>
-                        </scroller>
-                        <scroller key="verticalScroller" verticalHuggingPriority="750" horizontal="NO" id="sCZ-tT-tJg">
-                            <rect key="frame" x="-15" y="1" width="16" height="0.0"/>
-                            <autoresizingMask key="autoresizingMask"/>
-                        </scroller>
-                    </scrollView>
+                                </clipView>
+                                <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="YES" id="f7A-wW-L30">
+                                    <rect key="frame" x="-100" y="-100" width="87" height="18"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </scroller>
+                                <scroller key="verticalScroller" verticalHuggingPriority="750" horizontal="NO" id="sCZ-tT-tJg">
+                                    <rect key="frame" x="491" y="1" width="16" height="235"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </scroller>
+                            </scrollView>
+                        </subviews>
+                        <visibilityPriorities>
+                            <integer value="1000"/>
+                        </visibilityPriorities>
+                        <customSpacing>
+                            <real value="3.4028234663852886e+38"/>
+                        </customSpacing>
+                    </stackView>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="LV1-gJ-eqG">
-                        <rect key="frame" x="300" y="6" width="70" height="25"/>
-                        <buttonCell key="cell" type="roundTextured" title="Close" bezelStyle="texturedRounded" alignment="center" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="XSX-ev-3Ka">
+                        <rect key="frame" x="445" y="7" width="89" height="32"/>
+                        <buttonCell key="cell" type="push" title="Close" bezelStyle="rounded" alignment="center" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="XSX-ev-3Ka">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
-                            <string key="keyEquivalent" base64-UTF8="YES">
-DQ
-</string>
+                            <string key="keyEquivalent">r</string>
+                            <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                         </buttonCell>
                         <connections>
                             <action selector="hideDataWindow:" target="Voe-Tx-rLC" id="cn0-tO-5Jo"/>
@@ -872,10 +953,16 @@ DQ
                     </button>
                 </subviews>
             </view>
-            <point key="canvasLocation" x="874" y="363.5"/>
+            <connections>
+                <outlet property="initialFirstResponder" destination="LV1-gJ-eqG" id="YN3-1R-MfL"/>
+            </connections>
+            <point key="canvasLocation" x="833" y="236.5"/>
         </window>
     </objects>
     <resources>
-        <image name="NSListViewTemplate" width="14" height="10"/>
+        <image name="AddSegment" width="32" height="32"/>
+        <image name="RemovePath" width="32" height="32"/>
+        <image name="ShowData" width="32" height="32"/>
+        <image name="StopEditing" width="32" height="32"/>
     </resources>
 </document>

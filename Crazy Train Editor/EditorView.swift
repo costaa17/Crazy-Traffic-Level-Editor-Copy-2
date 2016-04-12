@@ -1,332 +1,434 @@
-
-
 import Cocoa
 
-let COL_COUNT = 64
-let ROW_COUNT = 40
+let COL_COUNT = 20
+let ROW_COUNT = 10
 
-let MARGIN_LEFT = 4
-let MARGIN_TOP = 4
-let TILE_SIZE = 2
+let MARGIN = 2
+
+
+struct Path {
+    var type: PathType
+    var color: NSColor
+    var segments: [PathSegment]
+}
+
+struct PathSegment {
+    var vertices: [CGPoint]
+}
+
+enum PathType: String {
+    case Road = "Road"
+    case Rail = "Rail"
+}
 
 class EditorView: NSView {
     var tileWidth: CGFloat = 0
     var tileHeight: CGFloat = 0
     var trackingArea: NSTrackingArea!
+    
+    @IBOutlet var backgroundTypePopUp: NSPopUpButton!
+    @IBOutlet var pathTypePopUp: NSPopUpButton!
+    
+    // The total width and height of the editor, including the margins
+    var width: CGFloat = 0
+    var height: CGFloat = 0
+    
+    // The vertex the mouse is currently over, set by the mouseMoved function
+    var currentVertex: CGPoint = CGPointMake(-1, -1);
+    
+    // The vertices that make up the new segment
+    var newVertices: [CGPoint] = []
+    
+    var shouldAppendSegment: Bool = false
+    
+    // All paths that have been added to the editor
     var paths: [Path] = []
+    
+    // The parts that the mouse was down on, i.e. the path, the segment, and the vertex
+    var downParts: (path: Int?, segment: Int?, vertex: Int?)
+    
+    
     var mouseLocation: CGPoint = CGPointMake(0, 0)
     var mouseDownLocation: CGPoint = CGPointMake(0, 0)
     var isEditing = false
-    var typeButton = Type.road
     var downOnExistingPoint = false
     var downOnExistingPath = false
     var selectedPath = -1
     var drag = false
     var addNewCurve = false
     
-    @IBAction func typeDidChange(sender: NSPopUpButton) {
-        let type = sender.titleOfSelectedItem!
-        
-        switch type {
-        case "road":
-            typeButton = Type.road
-            
-        case "rail":
-            typeButton = Type.rail
-            
-        case "walk":
-            typeButton = Type.walk
-            
-        case "cross":
-            typeButton = Type.cross
-            
-        case "crazy ped":
-            typeButton = Type.crazyPedestrian
-            
-        case "garbage":
-            typeButton = Type.garbage
-
-
-            
-        default:
-            typeButton = Type.road
-        }
-        
-        isEditing = false
-    }
-    
-    @IBAction func stopEditing(sender: NSButton) {
-        isEditing = false
-    }
-    @IBAction func newCurve(sender: NSButton) {
-        isEditing = false
-        addNewCurve = true
-    }
-
+    var indexOfPathToRemove = -1
+    var shouldRemovePathOnClick = false
     
     func setup(size: NSSize) {
-        
         self.tileWidth = size.width / CGFloat(COL_COUNT)
         self.tileHeight = size.height / CGFloat(ROW_COUNT)
-        Swift.print(tileWidth)
-        Swift.print(tileHeight)
-        // set window size to device size + 4 col and 4 row each side
-        self.window?.setContentSize (NSSize(width: size.width + 2*(CGFloat(MARGIN_LEFT) * self.tileWidth), height: size.height + 2*(CGFloat(MARGIN_TOP) * self.tileHeight)))
-        self.window?.center()
         
+        self.height = self.tileHeight * CGFloat(ROW_COUNT + 2 * MARGIN)
+        self.width = self.tileWidth * CGFloat(COL_COUNT + 2 * MARGIN)
+        self.window!.setContentSize(NSSize(width: self.width, height: self.height))
+        self.window!.center()
         
         // Set up the tracking area
         if self.trackingArea != nil {
             self.removeTrackingArea(self.trackingArea)
         }
-        
         trackingArea = NSTrackingArea(rect: self.bounds, options: [NSTrackingAreaOptions.ActiveInKeyWindow, NSTrackingAreaOptions.MouseMoved], owner: self, userInfo: nil)
         self.addTrackingArea(trackingArea)
-        //setData()
-    }
-    
-    /*func setData(){
-        let data = ""
         
-        let indexes = data.characters.split("/").map() {String($0)} // get each path
-        for(var i = 0; i < indexes.count; i++){
-            
-            var pathArray: [[CGPoint]] = []
-            var points: [CGPoint] = []
-            let typeString = indexes[i].characters.split(":").map() {String($0)}
-            let pathAString = typeString[1].characters.split("#").map() {String($0)}
-            
-            //let pointsString = pathAString[1].characters.split("@").map() {String($0)}
-            for a in pathAString{
-                let pointsString = a.characters.split("@").map() {String($0)}
-                
-                for var p = 0; p < pointsString.count; p = p + 1{
-                    
-                    let xyString = pointsString[p].characters.split(",").map() {String($0)}
-                    let flx = CGFloat((xyString[0] as NSString).floatValue)
-                    let fly = CGFloat((xyString[1] as NSString).floatValue)
-                    let point = (CGPointMake(flx , fly ))
-                    let x: CGFloat = (CGFloat(MARGIN_LEFT) + point.x) * CGFloat(tileWidth)
-                    let y: CGFloat = (CGFloat(MARGIN_TOP) + point.y) * CGFloat(tileHeight)
-                    points.append(CGPointMake(x , y))
-                }
-                pathArray.append(points)
-                points = []
+        // Setup background color popup
+        for item in self.backgroundTypePopUp.itemArray {
+            let colorSelector = Selector(item.title.lowercaseString + "Color")
+            if NSColor.respondsToSelector(colorSelector) {
+                let color = NSColor.performSelector(colorSelector).takeUnretainedValue() as! NSColor
+                item.image = NSImage.swatchWithColor(color, size: NSSize(width: 16, height: 16))
             }
-            
-            // create the Path
-            if typeString[0] == "road"{
-                paths.append(Path(type: Type.road, tileWidth: tileWidth, tileHeight: tileHeight, pointsArray: pathArray))
-            }
-            
-            if typeString[0] == "rail"{
-                paths.append(Path(type: Type.rail, tileWidth: tileWidth, tileHeight: tileHeight, pointsArray: pathArray))
-                
-            }
-            
-            if typeString[0] == "walk"{
-                paths.append(Path(type: Type.walk, tileWidth: tileWidth, tileHeight: tileHeight, pointsArray: pathArray))
-                
-            }
-            
-            if typeString[0] == "cross"{
-                paths.append(Path(type: Type.cross, tileWidth: tileWidth, tileHeight: tileHeight, pointsArray: pathArray))
-                
-            }
-            if typeString[0] == "crazyPedestrian"{
-                paths.append(Path(type: Type.crazyPedestrian, tileWidth: tileWidth, tileHeight: tileHeight, pointsArray: pathArray))
-                
-            }
-            if typeString[0] == "garbage"{
-                paths.append(Path(type: Type.garbage, tileWidth: tileWidth, tileHeight: tileHeight, pointsArray: pathArray))
-                
-            }
-
-
         }
+    }
+    
+    @IBAction func pathTypeDidChange(sender: NSPopUpButton) {
         
-
-    }*/
-    
-    
-    func newPoint(point: CGPoint) -> CGPoint{
-        return CGPointMake(floor(point.x / tileWidth) * tileWidth, floor(point.y / tileHeight) * tileHeight)
     }
     
-    func centerPoint(point: CGPoint) -> CGPoint{
-        return CGPointMake((floor(point.x / tileWidth) * tileWidth) + tileWidth, (floor(point.y / tileHeight) * tileHeight) + tileHeight)
-    }
-    
-    override func mouseMoved(theEvent: NSEvent) {
-        let pointInView = self.convertPoint(theEvent.locationInWindow, fromView: nil)
-        mouseLocation = newPoint(pointInView)
+    @IBAction func backgroundTypeDidChange(sender: NSPopUpButton) {
         self.setNeedsDisplayInRect(self.bounds)
     }
     
-    override func mouseDown(theEvent: NSEvent) {
-        let pointInView = self.convertPoint(theEvent.locationInWindow, fromView: nil)
+    @IBAction func stopEditing(sender: NSButton) {
+        endCurrentSegment()
+    }
+    
+    @IBAction func removePath(sender: NSButton) {
+        var theEvent: NSEvent!
+        var mouseLoc: CGPoint!
         
-        //test if is an existing point of the path array of one of the paths
-        downOnExistingPoint = false
-        for var i = 0; i < paths.count; i = i + 1{
-            for var j = 0; j < paths[i].path.count; j = j + 1{
-                for var k = 0; k < paths[i].path[j].count; k = k + 1{
-                    if paths[i].path[j][k] == newPoint(pointInView){
-                        downOnExistingPoint = true
-                        drag = false
-                        break
+        NSCursor.crosshairCursor().set()
+        whileLoop: while (true) {
+            theEvent = self.window?.nextEventMatchingMask(Int(NSEventMask.LeftMouseDownMask.rawValue | NSEventMask.MouseMovedMask.rawValue))
+            if theEvent != nil {
+                mouseLoc = self.convertPoint(theEvent.locationInWindow, fromView: nil)
+                
+                switch theEvent.type {
+                case NSEventType.MouseMoved:
+                    // Highlight current path
+                    self.indexOfPathToRemove = -1
+                    for i in 0 ..< self.paths.count {
+                        let path = generatePathAtIndex(i)
+                        let cgPath = path.CGPath(forceClose: false)
+                        let clickTargetCGPath = CGPathCreateCopyByStrokingPath(cgPath, nil, path.lineWidth, CGLineCap(rawValue: Int32(path.lineCapStyle.rawValue))!, CGLineJoin(rawValue: Int32(path.lineJoinStyle.rawValue))!, path.miterLimit)
+                        if CGPathContainsPoint(clickTargetCGPath, nil, mouseLoc, true) {
+                            self.indexOfPathToRemove = i
+                        }
+                    }
+                    
+                    self.setNeedsDisplayInRect(self.bounds)
+                    
+                case NSEventType.LeftMouseDown:
+                    self.shouldRemovePathOnClick = true
+                    self.mouseDown(theEvent)
+                    break whileLoop
+                default:
+                    break
+                }
+            }
+            
+        }
+        NSCursor.arrowCursor().set()
+    }
+    
+    @IBAction func addSegment(sender: NSButton) {
+        let newSegment = PathSegment(vertices: self.newVertices)
+        
+        if self.shouldAppendSegment {
+            // There is already a path. Append the current vertices as a
+            // new segment to the last path
+            self.paths[self.paths.count-1].segments.append(newSegment)
+        } else {
+            // There are not any paths. Create one and add the new segment
+            // as its one segment
+            let newPath = Path(type: PathType(rawValue: self.pathTypePopUp.titleOfSelectedItem!)!, color: randomColor(), segments: [newSegment])
+            self.paths.append(newPath)
+        }
+        
+        // Set the current vertices to contain just the last vertex of the previous segment
+        let lastVertex = self.newVertices[self.newVertices.count-1]
+        self.newVertices = [lastVertex]
+        
+        // Used if the user clicks the Stop Editing button to end the current segment.
+        // Usually, the Stop Editing button creates a new path with the current vertices
+        // but this flag will tell it to append the current vertices to the last path.
+        self.shouldAppendSegment = true
+        
+        self.setNeedsDisplayInRect(self.bounds)
+        
+    }
+    
+    func endCurrentSegment() {
+        let newSegment = PathSegment(vertices: self.newVertices)
+        
+        if self.shouldAppendSegment {
+            // Add current segment to last path
+            self.paths[self.paths.count-1].segments.append(newSegment)
+        } else {
+            // Add current segment as new path
+            let newPath = Path(type: PathType(rawValue: self.pathTypePopUp.titleOfSelectedItem!)!, color: randomColor(), segments: [newSegment])
+            self.paths.append(newPath)
+        }
+        
+        self.shouldAppendSegment = false
+        
+        self.newVertices = []
+        
+        self.setNeedsDisplayInRect(self.bounds)
+    }
+    
+
+    
+    override func mouseMoved(theEvent: NSEvent) {
+        currentVertex = vertexAtMouseLoc(theEvent)
+        self.setNeedsDisplayInRect(self.bounds)
+    }
+    
+    func vertexAtMouseLoc(event: NSEvent) -> CGPoint {
+        let mouseLoc = self.convertPoint(event.locationInWindow, fromView: nil)
+        let row = ceil((mouseLoc.y - 0.5 * self.tileHeight) / self.height * CGFloat(ROW_COUNT + 2 * MARGIN))
+        let col = ceil((mouseLoc.x - 0.5 * self.tileWidth) / self.width * CGFloat(COL_COUNT + 2 * MARGIN))
+        return CGPointMake(col, row)
+    }
+    
+    func rectAtVertex(vertex: CGPoint) -> CGRect {
+        let dim: CGFloat = 20.0
+        return CGRect(x: vertex.x * self.tileWidth - 0.5 * dim, y: vertex.y * self.tileHeight - 0.5 * dim, width: dim, height: dim)
+    }
+    
+    override func mouseDown(theEvent: NSEvent) {
+        if self.shouldRemovePathOnClick {
+            
+            
+            self.shouldRemovePathOnClick = false
+            
+            // Delete path
+            if self.indexOfPathToRemove != -1 {
+                self.paths.removeAtIndex(self.indexOfPathToRemove)
+                self.indexOfPathToRemove = -1
+            }
+            
+            self.setNeedsDisplayInRect(self.bounds)
+            return
+        }
+        
+        let currentVertex = vertexAtMouseLoc(theEvent)
+        
+        // Check if mouse is down on control point
+        self.downParts = (nil, nil, nil)
+        for i in 0 ..< self.paths.count {
+            let path = self.paths[i]
+            for j in 0 ..< path.segments.count {
+                let segment = path.segments[j];
+                for k in 0 ..< segment.vertices.count {
+                    let vertex = segment.vertices[k];
+                    if currentVertex.x == vertex.x && currentVertex.y == vertex.y {
+                        self.downParts = (i, j, k)
                     }
                 }
             }
         }
         
-        // if it's not on an existing point of the path array, test if it is on a path
-        downOnExistingPath = false
-        selectedPath = -1
-        if !downOnExistingPoint{
-            for var i = 0; i < paths.count; i = i + 1{
-                let pathToTest = CGPathCreateCopyByStrokingPath(paths[i].buildCGPath(), nil, 26, CGLineCap.Square, CGLineJoin.Round, 0)
-                if CGPathContainsPoint(pathToTest, nil , centerPoint(pointInView), false){
-                    downOnExistingPath = true
-                    selectedPath = i
-                }
+        if self.downParts.path != nil {
+            // Down on vertex, start drag
+        } else {
+            // Down on empty space, append to current path
+            
+            self.newVertices.append(currentVertex)
+            
+            
+            if (self.newVertices.count == 4) {
+                endCurrentSegment()
             }
         }
         
-        if self.isEditing && !downOnExistingPoint && !downOnExistingPath{
-            //add point to the last item of the path array of the last item of the paths array
-            paths[paths.count - 1].path[paths[paths.count - 1].path.count - 1].append(newPoint(mouseLocation))
-            if self.paths[paths.count - 1].path[paths[paths.count - 1].path.count - 1].count == 4 {
-                // Exit out of editing mode
-                //var myArray: [CGPoint] = []
-                //myArray.append(paths[paths.count - 1].path[paths[paths.count - 1].path.count - 1][1])
-                //paths[paths.count - 1].path.append(myArray)
-                addNewCurve = true
-                
-            }
-            
-        }
-        if !downOnExistingPoint && !downOnExistingPath{
-            if !isEditing || addNewCurve{
-                self.mouseLocation = pointInView
-                if !addNewCurve{
-                    // Create a new path at the end of the paths array
-                    let array: [[CGPoint]] = []
-                    self.paths.append(Path(type: typeButton, tileWidth: tileWidth, tileHeight: tileHeight, pointsArray: array))
-                    //add point to the last item of the path array of the last item of the paths array
-                    paths[paths.count - 1].path[paths[paths.count - 1].path.count - 1].append(newPoint(mouseLocation))
-                }else{
-                    var myArray: [CGPoint] = []
-                    myArray.append(paths[paths.count - 1].path[paths[paths.count - 1].path.count - 1][1])
-                    paths[paths.count - 1].path.append(myArray)
-                    paths[paths.count - 1].path[paths[paths.count - 1].path.count - 1 ].append(newPoint(mouseLocation))
-                }
-                self.addNewCurve = false
-                self.isEditing = true
-            }
-        }
         self.setNeedsDisplayInRect(self.bounds)
     }
     
     override func mouseDragged(theEvent: NSEvent) {
-        let pointInView = self.convertPoint(theEvent.locationInWindow, fromView: nil)
-        if downOnExistingPoint{
-            // test what point
-            for var i = 0; i < paths.count; i = i + 1{
-                for var j = 0; j < paths[i].path.count; j = j + 1{
-                    for var k = 0; k < paths[i].path[j].count; k = k + 1{
-                        if paths[i].path[j][k] == mouseLocation{
-                            //move it
-                            paths[i].path[j][k] = newPoint(pointInView)
-                            mouseLocation = newPoint(pointInView)
-                            drag = true
-                        }
+        if self.downParts.path != nil {
+            self.paths[self.downParts.path!].segments[self.downParts.segment!].vertices[self.downParts.vertex!] = vertexAtMouseLoc(theEvent)
+            self.setNeedsDisplayInRect(self.bounds)
+        }
+    }
+    
+    func colorForCurrentBackground() -> NSColor {
+        let item = self.backgroundTypePopUp.selectedItem!
+        let colorSelector = Selector(item.title.lowercaseString + "Color")
+        var color: NSColor? = nil
+        if NSColor.respondsToSelector(colorSelector) {
+            color = NSColor.performSelector(colorSelector).takeUnretainedValue() as? NSColor
+        }
+        return color!
+    }
+    
+    func getData() -> String {
+        var out = "{\n"
+        out += "\t\"levelNum\": \(1),\n"
+        out += "\t\"levelGoal\": \(20),\n"
+        out += "\t\"hasTutorial\": \(true),\n"
+        out += "\t\"tutorialText\": \"Touch cars to stop them. Slide cars forward to make them go faster.\",\n"
+        out += "\t\"rows\": \(ROW_COUNT),\n"
+        out += "\t\"cols\": \(COL_COUNT),\n"
+        out += "\t\"backgroundColor\": \"\(colorForCurrentBackground().hexString())\",\n"
+        out += "\t\"paths\": ["
+        for i in 0 ..< self.paths.count {
+            let path = self.paths[i]
+            out += "{\n"
+            out += "\t\t\"type\": \"\(path.type)\",\n"
+            out += "\t\t\"segments\": [\n"
+            
+            for j in 0 ..< path.segments.count {
+                let segment = path.segments[j]
+                out += "\t\t\t["
+                for k in 0 ..< segment.vertices.count {
+                    let vertex = segment.vertices[k]
+                    out += "\"{\(Int(vertex.x)-MARGIN),\(Int(vertex.y)-MARGIN)}\""
+                    if k < segment.vertices.count - 1 {
+                        out += ", "
                     }
                 }
-            }
-            self.setNeedsDisplayInRect(self.bounds)
-        }else if downOnExistingPath{
-            for var j = 0; j < paths[selectedPath].path.count; j = j + 1{
-                for var k = 0; k < paths[selectedPath].path[j].count; k = k + 1{
-                    let newPath = CGPointMake((paths[selectedPath].path[j][k].x) + theEvent.deltaX , (paths[selectedPath].path[j][k].y) - theEvent.deltaY)
-                    self.paths[selectedPath].path[j][k] = newPath
-                    self.setNeedsDisplayInRect(self.bounds)
+                out += "]"
+                if j < path.segments.count - 1 {
+                    out += ", \n"
                 }
             }
+            
+            out += "\n\t\t]\n"
+            
+            out += "\t}"
+            
+            if i < self.paths.count - 1 {
+                out += ", "
+            }
+        }
+        out += "]\n"
+        out += "}"
+        return out
+    }
+    
+    func printData() {
+        for path in self.paths {
+            Swift.print("\(path.type), R:\(path.color.redComponent), G:\(path.color.greenComponent), B:\(path.color.blueComponent), Segments (\(path.segments.count)): [ ", separator: "", terminator: "")
+            for segment in path.segments {
+                Swift.print("[", separator: "", terminator: "")
+                for vertex in segment.vertices {
+                    Swift.print("\(vertex), ", separator: "", terminator: "")
+                }
+                Swift.print("]", separator: "", terminator: "")
+            }
+            Swift.print(" ]", separator: "", terminator: "")
         }
     }
     
     override func mouseUp(theEvent: NSEvent) {
-        if downOnExistingPath{
-            for var j = 0; j < paths[selectedPath].path.count; j = j + 1{
-                for var k = 0; k < paths[selectedPath].path[j].count; k = k + 1{
-                    self.paths[selectedPath].path[j][k] = newPoint(self.paths[selectedPath].path[j][k])
-                }
-                self.setNeedsDisplayInRect(self.bounds)
+        
+    }
+    
+    func pointForVertex(vertex: CGPoint) -> CGPoint {
+        return CGPoint(x: vertex.x * self.tileWidth, y: vertex.y * self.tileHeight)
+    }
+    
+    func generatePathAtIndex(i: Int) -> NSBezierPath {
+        let path = self.paths[i]
+        
+        let bezierPath = NSBezierPath()
+        bezierPath.lineWidth = 50
+        
+        for segment in path.segments {
+            if segment.vertices.count == 2 {
+                let p0 = pointForVertex(segment.vertices[0])
+                let p1 = pointForVertex(segment.vertices[1])
+                bezierPath.moveToPoint(p0)
+                bezierPath.lineToPoint(p1)
+            } else if segment.vertices.count == 3 {
+                let p0 = pointForVertex(segment.vertices[0])
+                let p1 = pointForVertex(segment.vertices[1])
+                let p2 = pointForVertex(segment.vertices[2])
+                bezierPath.moveToPoint(p0)
+                bezierPath.curveToPoint(p2, controlPoint1: p1, controlPoint2: p1)
+            } else if segment.vertices.count == 4 {
+                let p0 = pointForVertex(segment.vertices[0])
+                let p1 = pointForVertex(segment.vertices[1])
+                let p2 = pointForVertex(segment.vertices[2])
+                let p3 = pointForVertex(segment.vertices[3])
+                bezierPath.moveToPoint(p0)
+                bezierPath.curveToPoint(p3, controlPoint1: p1, controlPoint2: p2)
             }
         }
-        if downOnExistingPoint && !drag{
-            for var i = 0; i < paths.count; i = i + 1{
-                for var j = 0; j < paths[i].path.count; j = j + 1{
-                    for var k = 0; k < paths[i].path[j].count; k = k + 1{
-                        if paths[i].path[j][k] == mouseLocation{
-                            //move it
-                            paths[i].path[j].removeAtIndex(k)
-                            self.setNeedsDisplayInRect(self.bounds)
-                            downOnExistingPoint = false
-                        }
-                    }
-                }
-            }
-        }
+        
+        return bezierPath
     }
     
     override func drawRect(dirtyRect: NSRect) {
-        let deviceSize = NSSize(width: ((self.bounds.size.width/CGFloat(COL_COUNT + (2 * MARGIN_LEFT))) * CGFloat(COL_COUNT)),height:((self.bounds.size.height/CGFloat(ROW_COUNT + (2 * MARGIN_TOP))) * CGFloat(ROW_COUNT)))
-        NSColor.whiteColor().set()
+        colorForCurrentBackground().set()
         NSRectFill(self.bounds)
         
         // Draw grid
         NSColor.lightGrayColor().set()
-        for var col = 0; col < COL_COUNT + 8; col++ {
+        for col in 0 ..< COL_COUNT + 2 * MARGIN {
             NSRectFill(NSRect(x: CGFloat(col) * tileWidth, y: 0, width: 1, height: self.bounds.height))
         }
-        for var row = 0; row < ROW_COUNT + 8; row++ {
+        for row in 0 ..< ROW_COUNT + 2 * MARGIN {
             NSRectFill(NSRect(x: 0, y: CGFloat(row) * tileHeight, width: self.bounds.width, height: 1))
         }
+        
         // Draw device limits
-        NSColor.blackColor().set()
-        NSRectFill(NSRect(x: CGFloat(4) * tileWidth, y: tileHeight * 4, width: 2, height: deviceSize.height))
-        NSRectFill(NSRect(x: CGFloat(68) * tileWidth, y: tileHeight * 4, width: 2, height: deviceSize.height))
-        NSRectFill(NSRect(x: tileWidth * 4, y: CGFloat(4) * tileHeight, width: deviceSize.width, height: 2))
-        NSRectFill(NSRect(x: tileWidth * 4, y: CGFloat(24) * tileHeight, width: deviceSize.width, height: 1))
-        NSRectFill(NSRect(x: tileWidth * 4, y: CGFloat(44) * tileHeight, width: deviceSize.width, height: 2))
-        NSRectFill(NSRect(x: CGFloat(36) * tileWidth, y: tileHeight * 4, width: 1, height: deviceSize.height))
+        NSColor.darkGrayColor().set()
+        var deviceRect = NSRect(x: CGFloat(MARGIN) * self.tileWidth, y: CGFloat(MARGIN) * self.tileHeight, width: CGFloat(COL_COUNT) * self.tileWidth, height: CGFloat(ROW_COUNT) * self.tileHeight)
+        deviceRect = NSOffsetRect(deviceRect, 0.5, 0.5)
+        let path = NSBezierPath(rect: deviceRect)
+        path.lineWidth = 3.0
+        path.stroke();
         
-        
-        // Draw current tile
-        let point = newPoint(mouseLocation)
-        NSColor.redColor().set()
-        NSRectFill(NSRect(x: point.x, y: point.y, width: tileWidth * CGFloat(TILE_SIZE), height: tileHeight * CGFloat(TILE_SIZE)))
+        // Draw current vertex
+        NSColor.grayColor().set()
+        let rect = rectAtVertex(self.currentVertex)
+        NSBezierPath(ovalInRect: rect).fill()
         
         // Draw paths
-        let ctx: CGContextRef = NSGraphicsContext.currentContext()!.CGContext
-        for var i = 0; i < paths.count; i = i + 1{
-            paths[i].draw(ctx)
+        for i in 0 ..< self.paths.count {
+            if i == self.indexOfPathToRemove {
+                NSColor.infoBlueColor().set()
+            } else {
+                NSColor.darkGrayColor().set()
+            }
+            
+            let bezier = self.generatePathAtIndex(i)
+            bezier.stroke()
+            
+            self.paths[i].color.set()
+            for segment in self.paths[i].segments {
+                for vertex in segment.vertices {
+                    NSBezierPath(ovalInRect: rectAtVertex(vertex)).fill()
+                }
+            }
         }
-    }
-    
-    func buildData() -> Dictionary<String, AnyObject>{
-        var dataDictionary = [String: AnyObject]()
-        dataDictionary["rows"] = ROW_COUNT
-        dataDictionary["cols"] = COL_COUNT
-        var pathsArray: [Dictionary<String, AnyObject>] = []
-        for path in paths{
-            pathsArray.append(path.buildData())
+        
+        // Draw current path
+        NSColor.darkGrayColor().set()
+        if self.newVertices.count > 0 {
+            let bezier = NSBezierPath()
+            bezier.lineWidth = 50
+            bezier.moveToPoint(pointForVertex(self.newVertices[0]))
+            if self.newVertices.count == 2 {
+                bezier.lineToPoint(pointForVertex(self.newVertices[1]))
+            } else if self.newVertices.count == 3 {
+                bezier.curveToPoint(pointForVertex(self.newVertices[2]), controlPoint1: pointForVertex(self.newVertices[1]), controlPoint2: pointForVertex(self.newVertices[1]))
+            } else if self.newVertices.count == 4 {
+                bezier.curveToPoint(pointForVertex(self.newVertices[3]), controlPoint1: pointForVertex(self.newVertices[1]), controlPoint2: pointForVertex(self.newVertices[2]))
+            }
+            bezier.stroke()
         }
-        dataDictionary["paths"] = pathsArray
-        return dataDictionary
+        for vertex in self.newVertices {
+            NSBezierPath(ovalInRect: rectAtVertex(vertex)).fill()
+        }
+        
     }
-    
-   }
+}
 

@@ -1,17 +1,8 @@
-
-
 import Cocoa
-extension String {
-    
-    func stringByAppendingPathComponent(path: String) -> String {
-        
-        let nsSt = self as NSString
-        
-        return nsSt.stringByAppendingPathComponent(path)
-    }
-}
+
 
 @NSApplicationMain
+
 class AppDelegate: NSObject, NSApplicationDelegate {
     
     @IBOutlet var window: NSWindow!
@@ -23,7 +14,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     override func awakeFromNib() {
         deviceChanged(deviceButton)
     }
-    
     
     @IBAction func deviceChanged(sender: NSPopUpButton) {
         let deviceString = sender.titleOfSelectedItem!
@@ -40,18 +30,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         default:
             size = NSZeroSize
         }
-        // set window size to device size + 4 col and 4 row each side
-        //window.setContentSize (NSSize(width: (size.width + (size.width/64)*8),height: (size.height + (size.height/(40))*8)))
-        // Set up the tracking area
         editorView.setup(size)
-        //window.acceptsMouseMovedEvents = true
-        
-        //window.center()
     }
     
     @IBAction func showDataWindow(sender: NSButton) {
-        print("test")
-        saveJsonFile()
+        /*saveJsonFile()
 
         var data = ""
         for var p = 0; p < editorView.paths.count; p = p + 1{
@@ -64,7 +47,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         //dataTextView.string = saveJsonFile()
         window.beginSheet(dataWindow) {
         (NSModalResponse) -> Void in
+        }*/
+        self.dataTextView.string = self.editorView.getData()
+        self.window.beginSheet(self.dataWindow) { (NSModalResponse) -> Void in
+            
         }
+        
     }
     
   
@@ -82,7 +70,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func saveJsonFile() -> String{
-        do {
+        /*do {
             let jsonData = try NSJSONSerialization.dataWithJSONObject(editorView.buildData(), options: NSJSONWritingOptions.PrettyPrinted)
             let jsonString = NSString(data: jsonData, encoding: NSUTF8StringEncoding)! as String
             
@@ -104,10 +92,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             
             Swift.print(error)
             return ""
-        }
-        
+        }*/
+        return ""
     }
-
-    
 }
-
