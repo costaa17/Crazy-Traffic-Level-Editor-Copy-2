@@ -19,6 +19,8 @@ struct PathSegment {
 enum PathType: String {
     case Road = "Road"
     case Rail = "Rail"
+    case Walk = "Walk"
+    case Cross = "Cross"
 }
 
 class EditorView: NSView {
@@ -84,6 +86,67 @@ class EditorView: NSView {
                 item.image = NSImage.swatchWithColor(color, size: NSSize(width: 16, height: 16))
             }
         }
+        setData("/Users/CostaA17/Desktop/test.json", screenSize: size)
+    }
+    
+    func setData(filePath: String, screenSize: NSSize){ // set data from old level editor JSON file
+        do {
+            let contents = try NSString(contentsOfFile: filePath, usedEncoding: nil) as String
+            
+            if let data = contents.dataUsingEncoding(NSUTF8StringEncoding) {
+                do {
+                    let dic = try NSJSONSerialization.JSONObjectWithData(data, options: []) as? [String:AnyObject]
+                    let pathsArray = dic!["paths"]// array of dictionaries
+                    let dataTileWidth = CGFloat(screenSize.width)/((dic!["cols"] as! CGFloat))
+                    let dataTileHeight = CGFloat(screenSize.height)/((dic!["rows"] as! CGFloat))
+                    
+                    for path in pathsArray as! NSArray {
+                        var newPath = Path(type: .Road, color: randomColor(), segments: [PathSegment]())
+                        let pointsArray = path.valueForKey("points") as! NSArray // array of CGPoint arrays
+                        
+                        for curve in pointsArray {
+                            var points: [CGPoint] = []
+                            
+                            for p in curve as! NSArray {
+                                let point = p as! NSArray
+                                let flx = CGFloat(point[0].floatValue)
+                                let fly = CGFloat(point[1].floatValue)
+                                points.append(vertexFromPoint(CGPointMake(flx * dataTileWidth, fly * dataTileHeight)))
+                                
+                            }
+                            
+                            let segment = PathSegment(vertices: points)
+                            newPath.segments.append(segment)
+                        }
+                        
+                        let typeString = path.valueForKey("Type")
+                        
+                        switch typeString as! String {
+                        case "road":
+                            newPath.type = .Road
+                        case "rail":
+                            newPath.type = .Rail
+                        case "walk":
+                            newPath.type = .Walk
+                        case "cross":
+                            newPath.type = .Cross
+                        default:
+                            break
+                            
+                        }
+                        paths.append(newPath)
+                    }
+                    
+                } catch {
+                    
+                }
+            }
+        } catch let error as NSError {
+            Swift.print(error)
+            
+            // contents could not be loaded
+        }
+
     }
     
     @IBAction func pathTypeDidChange(sender: NSPopUpButton) {
@@ -189,13 +252,22 @@ class EditorView: NSView {
         self.setNeedsDisplayInRect(self.bounds)
     }
     
-    func vertexAtMouseLoc(event: NSEvent) -> CGPoint {
-        let mouseLoc = self.convertPoint(event.locationInWindow, fromView: nil)
-        let row = ceil((mouseLoc.y - 0.5 * self.tileHeight) / self.height * CGFloat(ROW_COUNT + 2 * MARGIN))
-        let col = ceil((mouseLoc.x - 0.5 * self.tileWidth) / self.width * CGFloat(COL_COUNT + 2 * MARGIN))
+    func vertexAtLocation(location: CGPoint) -> CGPoint {
+        let row = ceil((location.y - 0.5 * self.tileHeight) / self.height * CGFloat(ROW_COUNT + 2 * MARGIN))
+        let col = ceil((location.x - 0.5 * self.tileWidth) / self.width * CGFloat(COL_COUNT + 2 * MARGIN))
         return CGPointMake(col, row)
     }
     
+    func vertexFromPoint(point: CGPoint) -> CGPoint {
+        let relocatedPoint = CGPointMake(point.x + CGFloat(MARGIN) * self.tileWidth, point.y + CGFloat(MARGIN) * self.tileHeight) //adapt to the margin
+        return vertexAtLocation(relocatedPoint)
+    }
+    
+    func vertexAtMouseLoc(event: NSEvent) -> CGPoint {
+        let mouseLoc: CGPoint = self.convertPoint(event.locationInWindow, fromView: nil)
+        return vertexAtLocation(mouseLoc)
+    }
+       
     func rectAtVertex(vertex: CGPoint) -> CGRect {
         let dim: CGFloat = 20.0
         return CGRect(x: vertex.x * self.tileWidth - 0.5 * dim, y: vertex.y * self.tileHeight - 0.5 * dim, width: dim, height: dim)
@@ -338,7 +410,15 @@ class EditorView: NSView {
         let path = self.paths[i]
         
         let bezierPath = NSBezierPath()
-        bezierPath.lineWidth = 50
+        
+        switch path.type {
+        case .Road:
+            bezierPath.lineWidth = 50
+        case .Walk:
+            bezierPath.lineWidth = 15
+        default:
+            break
+        }
         
         for segment in path.segments {
             if segment.vertices.count == 2 {
@@ -351,14 +431,14 @@ class EditorView: NSView {
                 let p1 = pointForVertex(segment.vertices[1])
                 let p2 = pointForVertex(segment.vertices[2])
                 bezierPath.moveToPoint(p0)
-                bezierPath.curveToPoint(p2, controlPoint1: p1, controlPoint2: p1)
+                bezierPath.curveToPoint(p1, controlPoint1: p2, controlPoint2: p2)
             } else if segment.vertices.count == 4 {
                 let p0 = pointForVertex(segment.vertices[0])
                 let p1 = pointForVertex(segment.vertices[1])
                 let p2 = pointForVertex(segment.vertices[2])
                 let p3 = pointForVertex(segment.vertices[3])
                 bezierPath.moveToPoint(p0)
-                bezierPath.curveToPoint(p3, controlPoint1: p1, controlPoint2: p2)
+                bezierPath.curveToPoint(p1, controlPoint1: p2, controlPoint2: p3)
             }
         }
         
@@ -379,7 +459,7 @@ class EditorView: NSView {
         }
         
         // Draw device limits
-        NSColor.darkGrayColor().set()
+        NSColor.redColor().set()
         var deviceRect = NSRect(x: CGFloat(MARGIN) * self.tileWidth, y: CGFloat(MARGIN) * self.tileHeight, width: CGFloat(COL_COUNT) * self.tileWidth, height: CGFloat(ROW_COUNT) * self.tileHeight)
         deviceRect = NSOffsetRect(deviceRect, 0.5, 0.5)
         let path = NSBezierPath(rect: deviceRect)
@@ -396,7 +476,7 @@ class EditorView: NSView {
             if i == self.indexOfPathToRemove {
                 NSColor.infoBlueColor().set()
             } else {
-                NSColor.darkGrayColor().set()
+                NSColor.whiteColor().set()
             }
             
             let bezier = self.generatePathAtIndex(i)
@@ -411,17 +491,26 @@ class EditorView: NSView {
         }
         
         // Draw current path
-        NSColor.darkGrayColor().set()
+        NSColor.whiteColor().set()
         if self.newVertices.count > 0 {
             let bezier = NSBezierPath()
+            switch PathType(rawValue: self.pathTypePopUp.titleOfSelectedItem!)! {
+            case .Road:
+                bezier.lineWidth = 50
+            case .Walk:
+                bezier.lineWidth = 15
+            default:
+                break
+            }
+            
             bezier.lineWidth = 50
             bezier.moveToPoint(pointForVertex(self.newVertices[0]))
             if self.newVertices.count == 2 {
                 bezier.lineToPoint(pointForVertex(self.newVertices[1]))
             } else if self.newVertices.count == 3 {
-                bezier.curveToPoint(pointForVertex(self.newVertices[2]), controlPoint1: pointForVertex(self.newVertices[1]), controlPoint2: pointForVertex(self.newVertices[1]))
+                bezier.curveToPoint(pointForVertex(self.newVertices[1]), controlPoint1: pointForVertex(self.newVertices[2]), controlPoint2: pointForVertex(self.newVertices[2]))
             } else if self.newVertices.count == 4 {
-                bezier.curveToPoint(pointForVertex(self.newVertices[3]), controlPoint1: pointForVertex(self.newVertices[1]), controlPoint2: pointForVertex(self.newVertices[2]))
+                bezier.curveToPoint(pointForVertex(self.newVertices[1]), controlPoint1: pointForVertex(self.newVertices[2]), controlPoint2: pointForVertex(self.newVertices[3]))
             }
             bezier.stroke()
         }
