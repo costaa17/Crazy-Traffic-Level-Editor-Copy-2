@@ -214,7 +214,7 @@ class EditorView: NSView {
         }
         
         // Set the current vertices to contain just the last vertex of the previous segment
-        let lastVertex = self.newVertices[self.newVertices.count-1]
+        let lastVertex = self.newVertices[1]
         self.newVertices = [lastVertex]
         
         // Used if the user clicks the Stop Editing button to end the current segment.
@@ -267,7 +267,7 @@ class EditorView: NSView {
         let mouseLoc: CGPoint = self.convertPoint(event.locationInWindow, fromView: nil)
         return vertexAtLocation(mouseLoc)
     }
-       
+    
     func rectAtVertex(vertex: CGPoint) -> CGRect {
         let dim: CGFloat = 20.0
         return CGRect(x: vertex.x * self.tileWidth - 0.5 * dim, y: vertex.y * self.tileHeight - 0.5 * dim, width: dim, height: dim)
